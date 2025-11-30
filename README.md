@@ -1,2 +1,2 @@
 # zhix-articles
-articles for zhix website
+Articles for ZhiX website
