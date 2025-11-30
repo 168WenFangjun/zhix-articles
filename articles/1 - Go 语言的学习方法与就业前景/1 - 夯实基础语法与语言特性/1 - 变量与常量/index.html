@@ -1,0 +1,270 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Go 变量与常量 — 爱的编程笔记</title>
+<style>
+:root{
+  --bg:#0f1724;
+  --card:#0b1220;
+  --accent1:#ff6b81;
+  --accent2:#7c5cff;
+  --muted:#9aa7c7;
+  --glass: rgba(255,255,255,0.04);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: "Helvetica Neue", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+  background: radial-gradient(1200px 600px at 10% 10%, rgba(124,92,255,0.12), transparent),
+              radial-gradient(900px 500px at 90% 90%, rgba(255,107,129,0.08), transparent),
+              var(--bg);
+  color:#e6eef8;
+  -webkit-font-smoothing:antialiased;
+  line-height:1.7;
+}
+.container{
+  max-width:980px;
+  margin:36px auto;
+  padding:28px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  border-radius:16px;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+  position:relative;
+  overflow:hidden;
+  border: 1px solid rgba(255,255,255,0.03);
+}
+.header{
+  display:flex;
+  gap:20px;
+  align-items:center;
+  margin-bottom:18px;
+}
+.logo{
+  width:84px;height:84px;border-radius:14px;
+  background:linear-gradient(135deg,var(--accent2),var(--accent1));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:22px;color:white;
+  box-shadow: 0 8px 30px rgba(124,92,255,0.14);
+}
+.title{
+  flex:1;
+}
+.title h1{margin:0;font-size:22px}
+.title p{margin:4px 0 0;color:var(--muted)}
+.hero{
+  margin:20px 0;
+  display:flex;
+  gap:20px;
+  align-items:flex-start;
+}
+.article{
+  flex:1;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.0));
+  padding:18px;border-radius:12px;
+  border:1px solid rgba(255,255,255,0.025);
+}
+.sidebar{
+  width:260px;
+  padding:16px;
+  border-radius:12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.0));
+  border:1px solid rgba(255,255,255,0.02);
+}
+.kv{
+  display:flex;gap:12px;align-items:center;margin-bottom:12px;
+}
+.kv .dot{
+  width:54px;height:54px;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent1),var(--accent2));
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:white;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+}
+.code{
+  background:rgba(0,0,0,0.45);
+  padding:12px;border-radius:8px;overflow:auto;font-family:Consolas, "Courier New", monospace;
+  font-size:13px;color:#cfefff;border:1px solid rgba(255,255,255,0.03);
+  margin:12px 0;
+}
+h2{color: #fff; margin-top:18px}
+p.lead{color:var(--muted);margin-top:8px}
+.small{font-size:13px;color:var(--muted)}
+.footer{
+  margin-top:20px;padding-top:12px;border-top:1px dashed rgba(255,255,255,0.03);display:flex;justify-content:space-between;align-items:center;
+}
+.badge{
+  padding:8px 12px;border-radius:999px;background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  color:var(--muted);font-size:13px;border:1px solid rgba(255,255,255,0.02);
+}
+.romantic{
+  font-style:italic;color:#ffd6e0;
+}
+.sultry{
+  color: #ffb3c6;
+}
+.signature{font-family:"Georgia",serif;color:var(--muted);margin-top:18px;font-size:14px}
+.banner-svg{position:absolute;right:-80px;top:-80px;opacity:0.12;transform:rotate(12deg)}
+/* responsive */
+@media(max-width:900px){
+  .hero{flex-direction:column}
+  .sidebar{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">Go♡</div>
+    <div class="title">
+      <h1>Go 的变量与常量 — 爱的编程笔记</h1>
+      <p>用言情小说的笔触，带你温柔而清晰地读懂 Go 里的变量与常量。</p>
+    </div>
+    <div class="badge">适合：大学生 · 初学者</div>
+  </div>
+
+  <div class="hero">
+    <div class="article">
+      <h2>引子 — 初见</h2>
+      <p class="lead">那天的代码像初恋，一行行被你轻轻读过；变量是名字，常量是誓言。作为 Go 的初学者，你也许在花丛间徘徊，不知如何叫出那朵最美的变量。别怕，我来牵你的手。</p>
+
+      <h2>第 1 节：什么是变量？</h2>
+      <p>变量，在程序里就是一个有名字的容器，它可以装下某些东西——数字、文本、甚至是你悄悄放进来的情绪。Go 用 <code>var</code> 关键字声明变量：</p>
+      <div class="code">
+<pre>// 声明一个整型变量 age
+var age int
+age = 21
+
+// 声明并初始化
+var name string = "小明"
+
+// 短变量声明（函数内）
+city := "北京"</pre>
+      </div>
+      <p>短变量声明像是恋人间的一句俏皮话，简单、直接、在函数里最常用。正式的 <code>var</code> 更像是婚书，郑重其事。</p>
+
+      <h2>第 2 节：类型是你的气质</h2>
+      <p>在 Go 里，每个变量都有类型（type）。类型决定了你能给变量什么样的“礼物”。数字、字符、布尔……类型像气质，让变量显得可靠。</p>
+
+      <h2>第 3 节：常量——不变的誓言</h2>
+      <p>常量（<code>const</code>）在声明时就确定了，之后不能再改变。它是程序里的誓言，是你对世界的小小承诺。</p>
+      <div class="code">
+<pre>const Pi = 3.14159
+const Greeting string = "你好，世界"</pre>
+      </div>
+
+      <h2>第 4 节：细节与约定</h2>
+      <p>在 Go 中，变量名以小写字母开头表示包内可见，以大写字母开头表示导出给包外使用。这像是对外的微笑或悄悄的私语。</p>
+
+      <h2>实战演练：用代码讲故事</h2>
+      <p>下面我们写一个小函数，像是一段短短的爱情独白，变量与常量交织其中：</p>
+      <div class="code">
+<pre>package main
+
+import "fmt"
+
+const defaultGreeting = "嗨，陌生人"
+
+func main() {
+    name := "阿莉"
+    age := 20
+    fmt.Println(defaultGreeting, name)
+    fmt.Printf("%s 年龄：%d\n", name, age)
+}</pre>
+      </div>
+      <p>运行后，程序会温柔地输出：它是程序世界里最简单的对话。</p>
+
+      <h2>第 6 节：常见误区（别踩雷）</h2>
+      <ul>
+        <li>未使用的变量会导致编译错误——Go 要求每个变量都要被“认真对待”。</li>
+        <li>短变量声明只能在函数体内使用。</li>
+        <li>不要把类型和变量名写成同一个词，否则会让人困惑。</li>
+      </ul>
+
+      <h2>第 7 节：从零到一的练习（小任务）</h2>
+      <p>完成如下小练习，将帮助你把知识变成习惯：</p>
+      <ol>
+        <li>写一个程序，声明一对常量与变量，输出一段话。</li>
+        <li>尝试不同类型的变量，体会类型转换。</li>
+        <li>在函数内使用短变量声明，体会它与 <code>var</code> 的不同。</li>
+      </ol>
+
+      <h2>结尾 — 再见亦如初见</h2>
+      <p class="romantic">当你合上编辑器，变量的名字仍像情诗里的押韵字，常量的承诺像月光不再改变。Go 的世界并不冷漠，只要你愿意用心，它会给你真挚的回报。</p>
+
+      <div class="signature">— 写给学 Go 的你</div>
+    </div>
+
+    <aside class="sidebar">
+      <div class="kv">
+        <div class="dot">01</div>
+        <div>
+          <div class="small">学习小贴士</div>
+          <div><strong>把代码读成故事</strong></div>
+        </div>
+      </div>
+
+      <div class="kv">
+        <div class="dot">02</div>
+        <div>
+          <div class="small">常用示例</div>
+          <div><strong>var / const / :=</strong></div>
+        </div>
+      </div>
+
+      <div class="kv">
+        <div class="dot">03</div>
+        <div>
+          <div class="small">提醒</div>
+          <div><strong>未使用变量会报错</strong></div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:8px">图示：变量与常量的关系</h3>
+      <!-- Simple SVG illustration -->
+      <svg width="220" height="140" viewBox="0 0 220 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="g1" x1="0" x2="1">
+            <stop offset="0" stop-color="#7c5cff"/>
+            <stop offset="1" stop-color="#ff6b81"/>
+          </linearGradient>
+        </defs>
+        <rect x="8" y="8" width="204" height="124" rx="10" fill="rgba(255,255,255,0.02)"/>
+        <rect x="20" y="18" width="80" height="40" rx="8" fill="url(#g1)"/>
+        <text x="30" y="43" font-size="13" fill="#fff">变量 (可变)</text>
+        <rect x="120" y="18" width="80" height="40" rx="8" fill="#223049"/>
+        <text x="132" y="43" font-size="13" fill="#fff">常量 (不可变)</text>
+        <line x1="100" y1="60" x2="120" y2="60" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>
+        <text x="68" y="90" font-size="12" fill="#cfefff">赋值 → 改变</text>
+        <text x="132" y="90" font-size="12" fill="#cfefff">固定 → 稳定</text>
+      </svg>
+
+      <h3 style="margin-top:12px">快速索引</h3>
+      <div class="small">变量：<code>var x type</code> / <code>x := v</code></div>
+      <div class="small">常量：<code>const NAME = value</code></div>
+      <div style="margin-top:12px;">
+        <button onclick="document.getElementById('download').scrollIntoView({behavior:'smooth'})" style="width:100%;padding:10px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:white;font-weight:600;cursor:pointer">立即练习 ↓</button>
+      </div>
+    </aside>
+  </div>
+
+  <div class="footer">
+    <div class="small">如果你想把这篇文章放进笔记：<span id="download"><a href="index.html" download style="color:#ffd6e0">下载 HTML 文件</a></span></div>
+    <div class="small">设计风格：时髦 · 带一点暧昧的审美</div>
+  </div>
+
+  <!-- decorative SVG -->
+  <svg class="banner-svg" width="420" height="420" viewBox="0 0 420 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="210" cy="210" r="160" fill="url(#bgrad)" />
+    <defs>
+      <radialGradient id="bgrad" cx="0" cy="0" r="1">
+        <stop offset="0" stop-color="#ff6b81"/>
+        <stop offset="1" stop-color="#7c5cff"/>
+      </radialGradient>
+    </defs>
+  </svg>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,251 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>在Go的世界里遇见你 — 基本类型学习指南</title>
+  <style>
+    /* 迎合中国大学生时髦审美：渐变、玻璃化毛玻璃、柔和阴影、现代字体感 */
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&display=swap');
+    :root{
+      --bg1:#0f1724; --bg2:#26194b;
+      --accent:#ff6b81; --accent2:#7c5cff;
+      --glass: rgba(255,255,255,0.06);
+      --muted: #bfc7d6;
+    }
+    html,body{height:100%; margin:0; font-family:"Noto Sans SC", "Helvetica Neue", Arial, sans-serif; color:#e6eef8; background:linear-gradient(135deg,var(--bg1),var(--bg2)); -webkit-font-smoothing:antialiased;}
+    .container{max-width:1100px;margin:40px auto;padding:28px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); box-shadow: 0 10px 40px rgba(2,6,23,0.6); backdrop-filter: blur(6px); position:relative; overflow:hidden;}
+    header{display:flex;align-items:center;gap:18px;margin-bottom:22px;}
+    .logo{width:84px;height:84px;border-radius:14px; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;box-shadow:0 8px 30px rgba(124,92,255,0.18);transform:rotate(-8deg);}
+    h1{margin:0;font-size:28px;line-height:1.05;}
+    .meta{margin-left:auto; text-align:right; color:var(--muted); font-size:13px;}
+    .hero{display:flex; gap:24px; align-items:flex-start;}
+    .hero .lead{flex:1;}
+    .lead p{color:var(--muted); font-size:15px; margin-top:8px;}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.025), transparent); border-radius:12px; padding:18px; margin:14px 0; box-shadow: 0 8px 30px rgba(2,6,23,0.45);}
+    .chapter{display:grid; grid-template-columns: 1fr 320px; gap:18px; align-items:start;}
+    .content{line-height:1.9; font-size:16px; color:#ecf6ff;}
+    .sidebar{position:sticky; top:30px; height:max-content; background:var(--glass); padding:12px; border-radius:12px; color:var(--muted); font-size:14px;}
+    pre{background:#07102a;padding:14px;border-radius:10px;overflow:auto;color:#dff3ff;}
+    code{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Noto Sans Mono", monospace; font-size:14px;}
+    .romance{color:var(--accent); font-weight:700;}
+    .hint{color:var(--muted); font-size:14px;}
+    .illustration{width:100%; border-radius:12px; overflow:hidden; margin:12px 0; box-shadow:0 12px 40px rgba(2,6,23,0.6);}
+    footer{margin-top:26px; color:var(--muted); font-size:13px; display:flex; justify-content:space-between; align-items:center;}
+    .cta{display:inline-block;padding:10px 14px;border-radius:10px;background:linear-gradient(90deg,var(--accent),var(--accent2)); color:white;text-decoration:none;font-weight:700;box-shadow:0 8px 20px rgba(255,107,129,0.12);}
+    .badge{display:inline-block;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.03);font-size:12px;color:var(--muted); margin-right:6px;}
+    /* 响应 */
+    @media (max-width:900px){ .chapter{grid-template-columns:1fr;} .logo{width:64px;height:64px;font-size:22px;} header{flex-wrap:wrap;} .meta{text-align:left;margin-left:0;} }
+    /* 小巧的“性张力”提示：用微妙的视觉和词语（含蓄）表述 */
+    .tension{display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,#ff9aa2,#7c5cff); color:white;font-weight:700;box-shadow:0 6px 18px rgba(124,92,255,0.12); transform:translateY(-2px);}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">Go</div>
+      <div>
+        <h1>在Go的世界里遇见你：布尔、数字、字符串与常量的学习法</h1>
+        <div class="hint">图文并貌 · 语言通俗 · 风格带一点言情小说的暧昧与温度</div>
+      </div>
+      <div class="meta">
+        作者：<strong>夏若知雪</strong><br/>
+        更新时间：<strong>2025-11-30</strong><br/>
+        阅读时长：约 12 分钟
+      </div>
+    </header>
+
+    <section class="hero card">
+      <div class="lead">
+        <div class="content">
+          <p class="romance">某个深夜，有人敲开了你的编辑器，轻声说：“来学Go吗？我带你认识它最温柔的四个部分。”</p>
+          <p>这篇文章用故事化、画面感十足的语言，把Go的基本类型——布尔（bool）、数字（整型、浮点、无符号）、字符串（string）与常量（const）——讲清楚、讲明白、讲好玩。适合刚入门的同学，也适合已经学过却总忘细节的你。文章里有示例代码、类比记忆法、练习题和心动小技巧，既能“看得懂”，也能“用得上”。</p>
+        </div>
+      </div>
+
+      <aside class="sidebar">
+        <div class="badge">目录</div>
+        <div style="margin-top:10px;">
+          1. 布尔：心有真/假的选择<br/>
+          2. 数字：整数与小数的温差<br/>
+          3. 字符串：一段话的呼吸与节奏<br/>
+          4. 常量：永远不变的承诺<br/>
+          5. 学习方法与练习<br/>
+          6. 小结与进阶路线
+        </div>
+        <div style="margin-top:12px;">
+          <div class="badge">风格说明</div>
+          这是带一点“性张力”的写法：不是露骨的描写，而是通过比喻、情绪和细节，让技术学习像一段含蓄的恋爱，温度和吸引并存。
+        </div>
+      </aside>
+    </section>
+
+    <section class="chapter">
+      <div class="card content">
+        <h2>1 · 布尔（bool）——心有真/假的选择</h2>
+        <p>布尔类型在Go里只有两个值：<code>true</code> 与 <code>false</code>。像是一对恋人，世界被二分为“在一起”和“不在一起”。看似简单，但很多逻辑故事都由它推动。</p>
+
+        <div class="illustration">
+          <!-- inline SVG illustration: 两个半心形成完整心 -->
+          <svg viewBox="0 0 600 140" width="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ff9aa2"/><stop offset="1" stop-color="#7c5cff"/></linearGradient>
+            </defs>
+            <rect width="100%" height="140" fill="#07102a"/>
+            <g transform="translate(40,20)">
+              <path d="M60 40 C 60 15, 100 15, 100 40 C 100 70, 60 90, 60 110 C 60 90, 20 70, 20 40 C 20 15, 60 15, 60 40 Z" fill="url(#g1)" opacity="0.95" />
+              <path d="M260 40 C 260 15, 300 15, 300 40 C 300 70, 260 90, 260 110 C 260 90, 220 70, 220 40 C 220 15, 260 15, 260 40 Z" fill="url(#g1)" opacity="0.6" />
+              <text x="120" y="80" fill="#cfe9ff" font-size="18" font-family="Noto Sans SC">true ↔ false</text>
+            </g>
+          </svg>
+        </div>
+
+        <p>代码示例（最朴素的开始）：</p>
+        <pre><code>package main
+
+import "fmt"
+
+func main() {
+    var loved bool = true
+    fmt.Println("Do I love Go?", loved) // 输出: Do I love Go? true
+}</code></pre>
+
+        <p>学习建议：</p>
+        <ul>
+          <li>把布尔想成“门的开/关”。任何判断（>、==、!=）都会输出布尔值。</li>
+          <li>练习：写几个条件句，模拟“约会是否成行”的逻辑（天气、作业、心情）。</li>
+        </ul>
+
+        <h2>2 · 数字（numbers）——整数与小数的温差</h2>
+        <p>数字类型稍微复杂一点，Go里常见的有：<code>int</code>、<code>int8/int16/int32/int64</code>（带位宽的整型），无符号整型 <code>uint</code>，还有浮点 <code>float32</code>、<code>float64</code>。</p>
+
+        <p>把数字想成两种性格：<strong>坚实稳定的整数</strong>，像踏实的人；和<strong>带小心思的浮点</strong>，像会反复想念细节的情绪。</p>
+
+        <pre><code>// 整数与浮点示例
+package main
+import "fmt"
+func main() {
+    var a int = 42
+    var b float64 = 3.1415
+    fmt.Println(a, b) // 42 3.1415
+}</code></pre>
+
+        <p>关键概念（务必记住）：</p>
+        <ol>
+          <li><strong>类型明确：</strong>Go是静态类型，<code>int</code> 与 <code>float64</code> 不能随意混用，需要显式转换：<code>float64(a)</code>。</li>
+          <li><strong>位宽与溢出：</strong>不同平台上<code>int</code>位宽可能为32或64，练习用指定位宽（如<code>int64</code>）避免歧义。</li>
+          <li><strong>算术运算：</strong>常用 + - * / %, 对整型做模运算时要注意符号和无符号 <code>uint</code> 的陷阱。</li>
+        </ol>
+
+        <p>练习题（恋爱小剧场版）：</p>
+        <p>假设你和Ta约会预算：门票 <code>int</code>、美食消费 <code>float64</code>，计算总花费并判断是否超出预算（布尔判断）。</p>
+
+        <h2>3 · 字符串（string）——一句话的呼吸与节奏</h2>
+        <p>字符串是承载文字的容器。在Go里，字符串是不可变的（immutable），这意味着每次“改变”字符串，实际上是创建了新的字符串。</p>
+
+        <pre><code>package main
+import "fmt"
+func main() {
+    s := "夜雨寄北"
+    fmt.Println("一句话：", s)
+}</code></pre>
+
+        <p>把字符串想像一封情书：字句已经写下，回忆变成了固定的线条。你可以做的，是拼接（<code>+</code>）、截取（切片）或用 <code>strings</code> 包处理它。</p>
+
+        <p>示例：拼接与长度</p>
+        <pre><code>import "fmt"
+import "strings"
+
+func main() {
+    a := "我爱"
+    b := "Go"
+    c := a + b
+    fmt.Println(c) // 我爱Go
+    fmt.Println(len(c)) // 字节长度，注意中文通常占3个字节（UTF-8）
+}</code></pre>
+
+        <p>学习小贴士：</p>
+        <ul>
+          <li>记住：<code>len(s)</code> 返回的是字节长度，不是字符数。要按“字符”数操作，用 <code>[]rune(s)</code> 转换。</li>
+          <li>练习：写一个函数反转字符串，注意中文字符的处理（使用 rune）。</li>
+        </ul>
+
+        <h2>4 · 常量（const）——永远不变的承诺</h2>
+        <p>常量是被赋予一次、永不改变的值。像是恋爱里那句“我会一直在”，它写死在代码里，且编译期即可确定。</p>
+
+        <pre><code>const Pi = 3.1415926
+const greeting = "此情可待成追忆"</code></pre>
+
+        <p>Go 的常量还有“枚举式”用法，配合 <code>iota</code> 可以优雅地定义一组递增常量。</p>
+
+        <pre><code>const (
+    Love = iota // 0
+    Like        // 1
+    Friend      // 2
+)</code></pre>
+
+        <p>学习建议：</p>
+        <ul>
+          <li>用常量保存不可变配置或魔法数字，增强代码可读性。</li>
+          <li>练习：用 <code>iota</code> 定义星期、权限位或状态码。</li>
+        </ul>
+
+        <h2>5 · 学习方法：把抽象变成故事</h2>
+        <p>下面是一些经过“说故事”验证过的学习方法，能帮你把枯燥的类型系统变成容易记忆的画面。</p>
+
+        <h3>方法一：拟人化比喻</h3>
+        <p>把每个类型拟人化：布尔是“是否开门的守门人”，整数是“体重结实的人”，浮点是“多愁善感的诗人”，字符串是“写情书的人”，常量是“不变的誓言”。</p>
+
+        <h3>方法二：写“恋爱剧本”练习</h3>
+        <p>把练习题写成小故事：条件判断（if/else）是决策分叉；switch 是戏剧性的情节转折；循环是两人反复约会的节奏。通过故事化的练习，你会把语法和语义同时记住。</p>
+
+        <h3>方法三：代码即日记</h3>
+        <p>每天写 15 分钟小代码，记录“今天我学会了什么”。把一个概念写成一个小函数或小程序，长期累积效果显著。</p>
+
+        <h3>方法四：刻意练习与回顾</h3>
+        <p>每周做一次小测验（选择题 + 简答 + 小程序），并复盘错误，把错误写进“错误集合”。下周复习这些错误，直到完全掌握。</p>
+
+        <h2>6 · 小练习（实战 5 题）</h2>
+        <ol>
+          <li>编写一个函数，接收预算（float64）与花费（float64），返回是否超支（bool）与剩余（float64）。</li>
+          <li>实现一个字符串反转函数，能正确处理中文。</li>
+          <li>用 <code>iota</code> 定义四个恋爱阶段常量。</li>
+          <li>写一个小程序：读取两个整数，判断哪一个更“像你”并输出相应信息（练习比较运算）。</li>
+          <li>解释：为什么 <code>len("你")</code> 的结果不是 1？</li>
+        </ol>
+
+        <h2>7 · 进阶建议与常见坑</h2>
+        <p class="hint">常见坑：</p>
+        <ul>
+          <li>不要把 <code>int</code> 与 <code>int32/int64</code> 混用，尤其在网络/文件 I/O 时要注意类型一致。</li>
+          <li>字符串长度（字节 vs. 字符）常常让人迷糊，中文操作请使用 rune 切片。</li>
+          <li>无符号整型（<code>uint</code>）在减法时可能出现隐式转换和溢出问题，要小心。</li>
+        </ul>
+
+        <h2>8 · 结尾：技术也可以有温度</h2>
+        <p>学习编程不必冷冰冰。把每个概念当作一个角色去认识，赋予它性格、背景与小故事。你会发现，抽象的类型系统慢慢变得有血有肉，甚至有了“性张力”的微妙张弛——不是为了挑逗，而是为了让学习更有吸引力，更能陪你度过深夜写程序的孤独时刻。</p>
+
+        <p>如果你愿意，把这篇文章保存下来，偶尔翻阅，就像翻看一封写给未来自己的情书。—— <strong>夏若知雪</strong></p>
+      </div>
+
+      <aside class="card sidebar">
+        <h3>小贴士与资源</h3>
+        <p class="hint">练习库：</p>
+        <ul>
+          <li>从 <code>tour.golang.org</code> 的Basics章节做起。</li>
+          <li>常用包：<code>fmt</code>, <code>strings</code>, <code>strconv</code>, <code>unicode/utf8</code>.</li>
+        </ul>
+        <p class="hint">学习节奏：</p>
+        <p>每天 30 分钟实作，5 天一个小主题（比如字符串），合成一篇自己的学习笔记。</p>
+        <div style="margin-top:12px;"><a class="cta" href="#download">立即下载 HTML</a></div>
+      </aside>
+    </section>
+
+    <footer>
+      <div>© 2025 夏若知雪 · 代码随文示例为教学用途</div>
+      <div><a class="cta" href="#download">下载 index.html</a></div>
+    </footer>
+  </div>
+</body>
+</html>

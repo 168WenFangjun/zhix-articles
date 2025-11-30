@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Go 的复合类型 — 数组与切片 · 夏若知雪</title>
+<style>
+@font-face {
+  font-family: "PingFangCN";
+  src: local("PingFangSC-Regular");
+}
+:root{
+  --bg:#0f1020;
+  --card:#0f1626;
+  --accent:#ff6b6b;
+  --muted:#9aa4c0;
+  --glass: rgba(255,255,255,0.04);
+}
+*{box-sizing:border-box}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:"PingFangCN", "Helvetica Neue", Arial, sans-serif;
+  background:
+    radial-gradient(800px 400px at 10% 10%, rgba(255,107,107,0.06), transparent 6%),
+    radial-gradient(600px 300px at 90% 90%, rgba(106,170,255,0.04), transparent 8%),
+    var(--bg);
+  color:#e6eef8;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  padding:36px;
+}
+.container{
+  max-width:980px;
+  margin:0 auto;
+}
+header.hero{
+  display:flex;
+  gap:20px;
+  align-items:center;
+  margin-bottom:22px;
+}
+.hero .cover{
+  width:220px;
+  height:220px;
+  border-radius:16px;
+  background:linear-gradient(135deg,#ff6b6b22,#6b9bff22);
+  box-shadow:0 8px 30px rgba(0,0,0,0.6), inset 0 -6px 20px rgba(0,0,0,0.15);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.04);
+}
+.cover svg{width:180px;height:180px;opacity:0.95}
+.hero .meta{
+  flex:1;
+}
+.title{
+  font-size:28px;line-height:1.1;margin:0 0 8px 0;
+  letter-spacing:0.4px;
+}
+.subtitle{color:var(--muted);margin:0 0 16px 0}
+.meta .byline{font-size:14px;color:#ffdede;opacity:0.95}
+.badge{
+  display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,#ff6b6b33,#6b9bff33);
+  color:#fff;font-weight:600;margin-right:8px;font-size:13px;
+  box-shadow:0 4px 18px rgba(107,155,255,0.07);
+}
+.card{
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius:16px;padding:22px;margin-bottom:18px;border:1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 6px 30px rgba(2,6,23,0.6);
+}
+.prose{font-size:16px;line-height:1.9;color:#e6eef8}
+.prose h2{margin-top:10px;margin-bottom:8px;font-size:20px;color:#fff}
+.figure{display:flex;gap:18px;align-items:flex-start;margin:18px 0}
+.figure .img{width:240px;flex-shrink:0;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.03);background:var(--glass);padding:10px}
+.figure .img svg{width:100%;height:auto;display:block}
+.figure .figcaption{flex:1;color:var(--muted);font-size:14px}
+.code{
+  background:linear-gradient(180deg, rgba(10,14,30,0.6), rgba(20,26,42,0.5));
+  padding:14px;border-radius:10px;font-family:Consolas,"Liberation Mono",monospace;font-size:13px;color:#d7e7ff;
+  overflow:auto;border:1px solid rgba(255,255,255,0.03);
+}
+.note{background:linear-gradient(90deg,#12122555,#09122633);padding:12px;border-radius:10px;color:var(--muted);font-size:14px;margin:12px 0}
+.footer{display:flex;justify-content:space-between;align-items:center;margin-top:18px;color:var(--muted);font-size:13px}
+.romance{color:#ffdede}
+.tension{color:#ffb3b3;font-weight:700}
+@media (max-width:720px){
+  .hero{flex-direction:column;align-items:flex-start}
+  .cover{width:160px;height:160px}
+  .figure{flex-direction:column}
+  .figure .img{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header class="hero card" role="banner">
+  <div class="cover" aria-hidden="true">
+    <!-- Decorative SVG illustrating array & slice as ribbons -->
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="数组与切片插画">
+      <defs>
+        <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ff6b6b"/><stop offset="1" stop-color="#6b9bff"/></linearGradient>
+      </defs>
+      <rect x="8" y="40" width="184" height="24" rx="4" fill="#071026"/>
+      <g transform="translate(0,0)" fill="url(#g1)" opacity="0.95">
+        <rect x="14" y="42" width="40" height="20" rx="3" />
+        <rect x="58" y="42" width="40" height="20" rx="3" />
+        <rect x="102" y="42" width="40" height="20" rx="3" />
+        <rect x="146" y="42" width="40" height="20" rx="3" />
+      </g>
+      <path d="M20 90 C60 60,140 60,180 90" stroke="#88d0ff33" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <circle cx="30" cy="88" r="6" fill="#ff6b6b"/>
+      <circle cx="170" cy="88" r="6" fill="#6b9bff"/>
+    </svg>
+  </div>
+  <div class="meta">
+    <div class="badge">教程 · 情感派</div>
+    <h1 class="title">在恋爱的节奏里学 Go：数组 与 切片</h1>
+    <p class="subtitle">用言情小说的笔调，带你把枯燥的复合类型读成温柔的故事。</p>
+    <div class="byline">作者：<strong>夏若知雪</strong> • 更新时间：<time>2025-11-30</time></div>
+  </div>
+</header>
+
+<article class="card prose" role="main">
+  <section>
+    <h2>序 · 初见（前奏）</h2>
+    <p>在许多初学 Go 的夜里，数组和切片像是两位高冷又神秘的主角——一个守口如瓶、按位置说话；一个灵动轻盈、随心所欲。把它们学明白，不只是写出能跑的程序，还能像谈一场成熟的恋爱：理解界限、学会伸缩、懂得托付与接收。</p>
+
+    <div class="figure">
+      <div class="img" aria-hidden="true">
+        <!-- simple illustrative SVG -->
+        <svg viewBox="0 0 300 160" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="20" width="288" height="44" rx="8" fill="#071028"/>
+          <g transform="translate(10,24)" fill="#9fc9ff">
+            <rect x="0" y="0" width="52" height="36" rx="4"/>
+            <rect x="60" y="0" width="52" height="36" rx="4"/>
+            <rect x="120" y="0" width="52" height="36" rx="4"/>
+            <rect x="180" y="0" width="52" height="36" rx="4"/>
+          </g>
+          <text x="18" y="110" fill="#bcd4ff" font-size="12">数组：固定的位置与温柔的承诺</text>
+        </svg>
+      </div>
+      <div class="figcaption">
+        <p>先别急着写代码，让我们像看小说一样读这两位主角的性格：数组严谨如他说的每一句话都按部就班，切片则更像悄悄出现的情书，灵活又贴心。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>一、认识数组：有边界的约定</h2>
+    <p>数组（array），在 Go 里是一种大小固定的集合：就像你与某人约定好每周见面的四次固定时刻，位置与数量都被写进契约里。声明数组时，你要告诉它“我们会有几次约会”，这个数字是数组类型的一部分。</p>
+
+    <div class="code" role="region" aria-label="Go 数组示例">
+<pre>var dates [4]string
+dates[0] = "周一 18:00"
+dates[1] = "周三 20:00"
+dates[2] = "周五 19:30"
+dates[3] = "周日 16:00"</pre>
+    </div>
+
+    <p>数组的长度是类型的一部分：<code>[4]string</code> 与 <code>[5]string</code> 不是同一种语言里可以互换的承诺——编译器会严格审查每一次你要把它们放到一起的举动。</p>
+
+    <div class="note">情感比喻：数组像是婚约。稳定、安全，但也带来不易改变的约束。</div>
+  </section>
+
+  <section>
+    <h2>二、切片：柔软、延展、会呼吸</h2>
+    <p>切片（slice）是 Go 的灵魂之一。它像一条柔软的丝带，系在数组的外面，也可以独立存在，能随心伸展或收缩。它会告诉你：我现在需要多少，未来可能会变。</p>
+
+    <div class="code" role="region" aria-label="Go 切片示例">
+<pre>nums := []int{2, 3, 5}
+nums = append(nums, 8) // nums 现在是 [2 3 5 8]</pre>
+    </div>
+
+    <p>切片由三部分构成（概念上）：指向底层数组的指针、长度（len）和容量（cap）。长度像是当下的感受，容量像是为未来预留的空间。</p>
+
+    <div class="figure">
+      <div class="img" aria-hidden="true">
+        <svg viewBox="0 0 360 160" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="30" width="344" height="36" rx="6" fill="#051226"/>
+          <g transform="translate(14,34)" fill="#ffdede">
+            <rect x="0" y="0" width="56" height="28" rx="4"/>
+            <rect x="64" y="0" width="56" height="28" rx="4"/>
+            <rect x="128" y="0" width="56" height="28" rx="4"/>
+            <rect x="192" y="0" width="56" height="28" rx="4"/>
+            <rect x="256" y="0" width="56" height="28" rx="4" fill="#b3ffd9" />
+          </g>
+          <text x="16" y="120" fill="#cddffd" font-size="12">切片：正在生长的情感（len 与 cap）</text>
+        </svg>
+      </div>
+      <div class="figcaption">
+        <p>当你 <code>append</code> 时，切片可能在背后偷偷为你准备更大的数组——像是悄悄把对方的信任堆高，然后在关键时刻，把两个人的世界连成一片。</p>
+      </div>
+    </div>
+
+    <div class="note">实践小贴士：用 <code>make([]T, len, cap)</code> 可以提前为切片分配容量，避免频繁的底层数组重分配，提升性能。</div>
+  </section>
+
+  <section>
+    <h2>三、数组与切片的「亲密接触」</h2>
+    <p>切片引用底层数组：这意味着如果两个人（两个切片）都指向同一片底层数组，互相修改会让彼此都感受到变化。说到底，这里牵扯的是“共享与副本”的界限。</p>
+
+    <div class="code" role="region" aria-label="共享底层数组示例">
+<pre>a := [4]int{1,2,3,4}
+s1 := a[0:2] // [1 2]
+s2 := a[1:3] // [2 3]
+s1[1] = 99
+// 现在 a == [1,99,3,4], s2 也会看到改变</pre>
+    </div>
+
+    <p>如果你想要一段独立的、互不干扰的副本，需要显式地复制（使用 <code>copy</code>）。像把一封信复写一份，寄给另一个人，而不是把同一封信同时交给两个人。</p>
+
+    <div class="code" role="region" aria-label="复制切片示例">
+<pre>orig := []byte("情书")
+dup := make([]byte, len(orig))
+copy(dup, orig)
+// 修改 dup 不会影响 orig</pre>
+    </div>
+
+    <div class="note">心里话：共享是亲密，但也要有界限。学习切片就是学会管理共享与副本。</div>
+  </section>
+
+  <section>
+    <h2>四、性能与实战——何时用数组，何时用切片？</h2>
+    <p>数组的大小固定，因此有时在函数签名中使用数组可以表达强契约（很少见）；但切片是 Go 的主力军，几乎所有集合操作都会用切片。</p>
+
+    <ol>
+      <li>如果数据大小在编译期确定，且你想把大小作为类型的一部分，数组适合；</li>
+      <li>大多数场景下，用切片，配合 <code>make</code> 控制容量，避免频繁分配；</li>
+      <li>注意切片的共享语义：并发场景下不要随意共享可变切片，或使用同步手段。</li>
+    </ol>
+
+    <div class="code" role="region" aria-label="示例：合理预分配">
+<pre>buf := make([]byte, 0, 1024) // 预留 1KB 的容量
+for i:=0;i&lt;500;i++ {
+  buf = append(buf, byte(i%256))
+}</pre>
+    </div>
+  </section>
+
+  <section>
+    <h2>五、把知识写进心里：练习与小任务</h2>
+    <p>像恋爱里需要小约会一样，练习要常做。下面是一些练手题：</p>
+    <ul>
+      <li>实现一个函数，接收任意 <code>[]int</code>，返回其逆序副本（不修改原切片）；</li>
+      <li>比较两种追加策略：每次 <code>append</code> 一个元素 vs. 预分配大容量，测量内存和时间差异；</li>
+      <li>写一个函数，把二维数组转换为一维切片并返回副本。</li>
+    </ul>
+
+    <div class="code" role="region" aria-label="练习示例代码">
+<pre>// 逆序副本示例
+func ReverseCopy(xs []int) []int {
+  out := make([]int, len(xs))
+  for i:=range xs {
+    out[i] = xs[len(xs)-1-i]
+  }
+  return out
+}</pre>
+    </div>
+
+    <p>做题的过程里，你既会练到语法，也会在错误与修复之间建立直觉——那种从陌生到熟悉的温柔，像恋爱里慢慢懂对方。</p>
+  </section>
+
+  <section>
+    <h2>六、常见坑与温柔提醒</h2>
+    <p>在学习数组与切片时，常见的陷阱包括：</p>
+    <ul>
+      <li>误以为切片是数组的别名：切片是对数组的一种描述，包含 len 和 cap；</li>
+      <li>注意切片的比较：不能直接用 <code>==</code> 比较两个切片（除非为 <code>nil</code>）；</li>
+      <li>在循环中取地址：用 <code>for i, v := range xs</code> 时不要把 <code>&v</code> 存起来，因为 v 是循环变量，会被复用。</li>
+    </ul>
+
+    <div class="note">示例（错误写法）：
+<pre>for _, v := range xs {
+  ptrs = append(ptrs, &v) // 错误：所有 ptrs 指向同一个 v
+}</pre></div>
+  </section>
+
+  <section>
+    <h2>尾声 · 持久的修炼</h2>
+    <p class="romance">学习 Go 的数组与切片，不只是在记忆语法，而是在培养一种对数据布局、性能与所有权的审美。就像恋爱需要耐心与观察，写好代码也需要细心与反复雕琢。</p>
+
+    <p class="tension">如果你愿意，把代码当作情书，写给未来的自己：清晰、优雅、可靠。</p>
+
+    <p>愿你在每一次 <code>append</code> 中体会到成长，在每一次 <code>copy</code> 后明白界限。</p>
+  </section>
+
+  <footer class="footer">
+    <div>© 2025 夏若知雪</div>
+    <div>文风：言情风 · 技术与情感并重</div>
+  </footer>
+</article>
+
+</div>
+</body>
+</html>
